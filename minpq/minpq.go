@@ -44,10 +44,10 @@ func (p *MinPQ) heapUp(ind int) {
 		return
 	}
 	parentInd := p.parent(ind)
-	if p.heap[ind].priority < p.heap[parentInd].priority {
+	for ind != 0 && p.heap[ind].priority < p.heap[parentInd].priority {
 		p.indices[p.heap[ind].val], p.indices[p.heap[parentInd].val] = p.indices[p.heap[parentInd].val], p.indices[p.heap[ind].val]
 		p.heap[ind], p.heap[parentInd] = p.heap[parentInd], p.heap[ind]
-		p.heapUp(parentInd)
+		ind, parentInd = parentInd, p.parent(parentInd)
 	}
 }
 
@@ -73,23 +73,27 @@ func (p *MinPQ) Insert(val interface{}, priority float32) {
 }
 
 func (p *MinPQ) heapDown(ind int) {
-	fChildInd := p.firstChild(ind)
-	if fChildInd >= p.size {
-		return
-	}
-	minInd := fChildInd
-	minPri := p.heap[fChildInd].priority
-	for i := 1; i < p.heapDegree && (fChildInd+1) < p.size; i++ {
-		iterPri := p.heap[fChildInd+i].priority
-		if iterPri < minPri {
-			minPri = iterPri
-			minInd = fChildInd + i
+	for {
+		fChildInd := p.firstChild(ind)
+		if fChildInd >= p.size {
+			return
 		}
-	}
-	if p.heap[ind].priority > minPri {
-		p.indices[p.heap[ind].val], p.indices[p.heap[minInd].val] = p.indices[p.heap[minInd].val], p.indices[p.heap[ind].val]
-		p.heap[ind], p.heap[minInd] = p.heap[minInd], p.heap[ind]
-		p.heapDown(minInd)
+		minInd := fChildInd
+		minPri := p.heap[fChildInd].priority
+		for i := 1; i < p.heapDegree && (fChildInd+1) < p.size; i++ {
+			iterPri := p.heap[fChildInd+i].priority
+			if iterPri < minPri {
+				minPri = iterPri
+				minInd = fChildInd + i
+			}
+		}
+		if p.heap[ind].priority > minPri {
+			p.indices[p.heap[ind].val], p.indices[p.heap[minInd].val] = p.indices[p.heap[minInd].val], p.indices[p.heap[ind].val]
+			p.heap[ind], p.heap[minInd] = p.heap[minInd], p.heap[ind]
+			ind = minInd
+		} else {
+			break
+		}
 	}
 }
 
