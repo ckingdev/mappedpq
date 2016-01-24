@@ -56,7 +56,7 @@ func (p *MinPQ) heapUp(ind int) {
 // duty to check this- the data structure will not be valid after inserting a
 // value already contained in the queue.
 func (p *MinPQ) Insert(val interface{}, priority float32) {
-	p.indices[val] = p.size + 1
+	p.indices[val] = p.size
 	if p.size+1 >= len(p.heap) {
 		p.heap = append(p.heap, node{
 			val:      val,
@@ -100,9 +100,12 @@ func (p *MinPQ) Pop() (interface{}, float32) {
 		return nil, 0
 	}
 	ret := p.heap[0]
+	delete(p.indices, p.heap[0].val)
 	p.size--
+	if p.size == 0 {
+		return ret.val, ret.priority
+	}
 	p.heap[0] = p.heap[p.size]
-	delete(p.indices, ret.val)
 	p.indices[p.heap[0].val] = 0
 	p.heapDown(0)
 	return ret.val, ret.priority
